@@ -9,13 +9,14 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Tailwind gray-100 */
+            background-color: #f3f4f6;
         }
         
-        /* Monospace font for aligned numbers, highly recommended for accounting/finance */
+        /* Monospace font strictly enforced for perfect vertical alignment */
         .number-font {
             font-family: 'JetBrains Mono', monospace;
             font-variant-numeric: tabular-nums;
+            white-space: pre; /* Essential to preserve exact spacing for positive/negative alignment */
         }
 
         /* Custom Scrollbar for the items list */
@@ -53,28 +54,34 @@
             <div class="text-center mb-8">
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-4">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <h1 class="text-2xl font-bold text-slate-900">Speed Computation</h1>
                 <p class="text-slate-500 mt-2 text-sm">Enhance your calculating speed. Grab your physical calculator and prepare to sum!</p>
             </div>
 
-            <div class="mb-6">
-                <label for="timer-select" class="block text-sm font-medium text-slate-700 mb-2">Timer per round (Seconds)</label>
-                <select id="timer-select" class="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                    <option value="30">30 Seconds</option>
-                    <option value="45">45 Seconds</option>
-                    <option value="60" selected>60 Seconds</option>
-                    <option value="90">90 Seconds</option>
-                    <option value="120">120 Seconds</option>
-                </select>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label for="timer-select" class="block text-sm font-medium text-slate-700 mb-2">Timer per round (Seconds)</label>
+                    <select id="timer-select" class="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        <option value="30">30 Seconds</option>
+                        <option value="45">45 Seconds</option>
+                        <option value="60" selected>60 Seconds</option>
+                        <option value="90">90 Seconds</option>
+                        <option value="120">120 Seconds</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="items-input" class="block text-sm font-medium text-slate-700 mb-2">Number of items (5 - 15)</label>
+                    <input type="number" id="items-input" min="5" max="15" value="10" class="w-full border border-slate-300 rounded-lg px-4 py-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                </div>
             </div>
 
             <div class="bg-blue-50 text-blue-800 text-xs rounded-lg p-4 mb-6">
                 <ul class="list-disc pl-4 space-y-1">
                     <li>5 rounds per session.</li>
-                    <li>5 to 15 items per round.</li>
+                    <li>Speed is tracked per round.</li>
                     <li>Values: ₱100,000 to ₱1,000,000.</li>
                     <li>Values in (parentheses) are negative.</li>
                 </ul>
@@ -109,11 +116,9 @@
 
             <!-- Ledger (Items List) -->
             <div class="flex-1 bg-[#fcfcfc] overflow-y-auto custom-scrollbar p-6 relative">
-                <!-- Ledger line decoration -->
                 <div class="absolute left-6 top-0 bottom-0 w-px bg-red-200 z-0"></div>
                 <div class="absolute left-7 top-0 bottom-0 w-px bg-red-200 z-0"></div>
                 
-                <!-- Items container -->
                 <div class="relative z-10 pl-4">
                     <div class="border-b-2 border-slate-800 pb-2 mb-2 flex justify-between items-end">
                         <span class="text-sm font-semibold text-slate-500">Items</span>
@@ -134,12 +139,14 @@
                 </div>
             </div>
             
-            <!-- Feedback Overlay (Hidden by default) -->
+            <!-- Feedback Overlay -->
             <div id="feedback-overlay" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm z-20 flex-col items-center justify-center p-6 text-center fade-in">
-                <div id="feedback-icon" class="mb-4">
-                    <!-- Dynamic Icon -->
-                </div>
+                <div id="feedback-icon" class="mb-4"></div>
                 <h2 id="feedback-title" class="text-2xl font-bold mb-2">Correct!</h2>
+                <div class="bg-slate-100 rounded-lg px-4 py-2 mb-6 inline-flex items-center space-x-2 border border-slate-200">
+                    <span class="text-slate-500 text-sm font-semibold uppercase tracking-wider">Speed:</span>
+                    <span id="feedback-speed" class="text-xl font-bold font-mono text-blue-600">0.0s</span>
+                </div>
                 <p id="feedback-message" class="text-slate-600 mb-8">You found the right sum.</p>
                 <button onclick="nextRound()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-md">
                     Continue to Next Round
@@ -148,19 +155,23 @@
         </div>
 
         <!-- ==================== END SCREEN ==================== -->
-        <div id="screen-end" class="hidden p-8 text-center fade-in">
-            <div class="mb-6">
-                <svg class="w-20 h-20 mx-auto text-yellow-400 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <div id="screen-end" class="hidden p-8 text-center fade-in max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="mb-4">
+                <svg class="w-16 h-16 mx-auto text-yellow-400 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M10 2a1 1 0 01.832.445l2.451 3.676 4.38.636a1 1 0 01.554 1.706l-3.17 3.09.749 4.363a1 1 0 01-1.451 1.054L10 15.017l-3.916 2.053a1 1 0 01-1.45-1.054l.749-4.363-3.17-3.09a1 1 0 01.554-1.706l4.38-.636 2.45-3.676A1 1 0 0110 2z" clip-rule="evenodd"></path>
                 </svg>
             </div>
-            <h2 class="text-3xl font-bold text-slate-900 mb-2">Session Complete!</h2>
-            <p class="text-slate-500 mb-8">Here is how you performed.</p>
+            <h2 class="text-2xl font-bold text-slate-900 mb-1">Session Complete!</h2>
             
-            <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 mb-8">
+            <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 mb-6 mt-4">
                 <div class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Final Score</div>
                 <div class="text-5xl font-bold text-blue-600 number-font" id="ui-final-score">4/5</div>
-                <p class="mt-3 font-medium text-slate-600" id="ui-final-message">Great job!</p>
+                <p class="mt-2 text-sm font-medium text-slate-600" id="ui-final-message">Great job!</p>
+            </div>
+
+            <!-- Speed Stats Container -->
+            <div id="ui-speed-stats" class="bg-white rounded-xl border border-slate-200 p-5 mb-6 shadow-sm text-left">
+                <!-- Speed stats injected via JS -->
             </div>
 
             <button onclick="resetToSetup()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -179,8 +190,11 @@
             timerDuration: 60,
             timeRemaining: 60,
             timerInterval: null,
+            itemCount: 10,
             currentCorrectAnswer: 0,
-            isAnswered: false
+            isAnswered: false,
+            roundStartTimestamp: 0,
+            roundTimes: [] // Array to hold speed tracking
         };
 
         // --- DOM Elements ---
@@ -192,6 +206,7 @@
         
         const uiElements = {
             timerSelect: document.getElementById('timer-select'),
+            itemsInput: document.getElementById('items-input'),
             round: document.getElementById('ui-round'),
             score: document.getElementById('ui-score'),
             timer: document.getElementById('ui-timer'),
@@ -202,13 +217,14 @@
             feedbackIcon: document.getElementById('feedback-icon'),
             feedbackTitle: document.getElementById('feedback-title'),
             feedbackMessage: document.getElementById('feedback-message'),
+            feedbackSpeed: document.getElementById('feedback-speed'),
             finalScore: document.getElementById('ui-final-score'),
-            finalMessage: document.getElementById('ui-final-message')
+            finalMessage: document.getElementById('ui-final-message'),
+            speedStats: document.getElementById('ui-speed-stats')
         };
 
         // --- Helper Functions ---
         
-        // Show a specific screen and hide others
         function switchScreen(screenName) {
             Object.values(screens).forEach(screen => screen.classList.add('hidden'));
             screens[screenName].classList.remove('hidden');
@@ -219,13 +235,15 @@
             }
         }
 
-        // Format number to string, handling negative parenthesis (e.g., (150,000))
+        // Format number to string. Crucial: Uses leading/trailing space for positive numbers 
+        // to perfectly align vertically with numbers wrapped in parenthesis.
         function formatCurrency(amount) {
             const absValue = Math.abs(amount).toLocaleString('en-US');
             if (amount < 0) {
                 return `(${absValue})`;
             }
-            return absValue;
+            // Add spaces matching the width of parenthesis to ensure precise alignment in monospace
+            return ` ${absValue} `;
         }
 
         // --- Game Logic ---
@@ -234,9 +252,17 @@
             // Read settings
             gameState.timerDuration = parseInt(uiElements.timerSelect.value);
             
+            // Validate and set item count (clamp between 5 and 15)
+            let parsedItems = parseInt(uiElements.itemsInput.value);
+            if (isNaN(parsedItems) || parsedItems < 5) parsedItems = 5;
+            if (parsedItems > 15) parsedItems = 15;
+            gameState.itemCount = parsedItems;
+            uiElements.itemsInput.value = parsedItems;
+            
             // Reset game state
             gameState.currentRound = 1;
             gameState.score = 0;
+            gameState.roundTimes = [];
             uiElements.score.textContent = '0';
             
             switchScreen('game');
@@ -252,18 +278,19 @@
             
             generateProblemData();
             startTimer();
+            // Record start time for speed tracking
+            gameState.roundStartTimestamp = performance.now();
         }
 
         function generateProblemData() {
-            // Random number of items: 5 to 15
-            const numItems = Math.floor(Math.random() * 11) + 5; 
+            const numItems = gameState.itemCount; 
             const items = [];
             let totalSum = 0;
 
             uiElements.itemsContainer.innerHTML = '';
 
             for (let i = 0; i < numItems; i++) {
-                // Generate a value between 100 and 1000, then multiply by 1000 to get min 100k, max 1m with 3 zeros
+                // Generate base val 100 to 1000, multiply by 1000 (Range 100k - 1M ending in 000)
                 let baseVal = Math.floor(Math.random() * 901) + 100; 
                 let value = baseVal * 1000;
                 
@@ -275,13 +302,16 @@
                 items.push(value);
                 totalSum += value;
 
-                // Create DOM element for the item
                 const el = document.createElement('div');
                 el.className = 'w-full flex justify-end tracking-wider';
-                // Add positive sign alignment hack (padding to match width of parenthesis)
-                el.innerHTML = value < 0 
-                    ? `<span class="text-red-600">${formatCurrency(value)}</span>` 
-                    : `<span class="pr-2">${formatCurrency(value)}</span>`;
+                
+                // Set color based on positive/negative
+                if (value < 0) {
+                    el.innerHTML = `<span class="text-red-600">${formatCurrency(value)}</span>`;
+                } else {
+                    el.innerHTML = `<span class="text-slate-800">${formatCurrency(value)}</span>`;
+                }
+                
                 uiElements.itemsContainer.appendChild(el);
             }
 
@@ -293,22 +323,17 @@
             const optionsSet = new Set();
             optionsSet.add(correctAnswer);
 
-            // Generate 4 unique distractors
             while (optionsSet.size < 5) {
-                // Distractors can vary by 10k, 100k, or random combination to keep endings in '000'
                 const multipliers = [10000, 50000, 100000, 200000, 500000];
                 const variance = multipliers[Math.floor(Math.random() * multipliers.length)];
                 
-                // Randomly add or subtract the variance
                 const direction = Math.random() > 0.5 ? 1 : -1;
-                // Add a small multiplier to make variance random (1 to 5 times)
                 const offset = variance * (Math.floor(Math.random() * 5) + 1) * direction;
                 
                 const distractor = correctAnswer + offset;
                 optionsSet.add(distractor);
             }
 
-            // Shuffle array
             const optionsArray = Array.from(optionsSet).sort(() => Math.random() - 0.5);
             const labels = ['A', 'B', 'C', 'D', 'E'];
 
@@ -316,19 +341,16 @@
             
             optionsArray.forEach((optValue, index) => {
                 const btn = document.createElement('button');
-                btn.className = `option-btn w-full flex items-center justify-between p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all focus:outline-none number-font`;
+                btn.className = `option-btn w-full flex items-center justify-between p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all focus:outline-none`;
                 btn.onclick = () => handleAnswer(optValue, btn);
                 
                 btn.innerHTML = `
                     <div class="flex items-center">
                         <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold mr-3 text-sm font-sans">${labels[index]}</span>
-                        <span class="text-lg font-semibold text-slate-800 tracking-wide">${formatCurrency(optValue)}</span>
+                        <span class="text-lg font-semibold text-slate-800 tracking-wide number-font">${formatCurrency(optValue)}</span>
                     </div>
                 `;
-                
-                // Store actual value as attribute
                 btn.dataset.value = optValue;
-                
                 uiElements.optionsContainer.appendChild(btn);
             });
         }
@@ -342,7 +364,6 @@
                 gameState.timeRemaining--;
                 updateTimerUI();
 
-                // Warning colors when low on time
                 if (gameState.timeRemaining <= 10) {
                     uiElements.timerContainer.classList.remove('text-emerald-400');
                     uiElements.timerContainer.classList.add('text-red-500');
@@ -366,27 +387,45 @@
             gameState.isAnswered = true;
             clearInterval(gameState.timerInterval);
 
+            // Calculate exact speed
+            const timeTaken = (performance.now() - gameState.roundStartTimestamp) / 1000;
             const isCorrect = (selectedAnswer === gameState.currentCorrectAnswer);
             
+            // Record stats
+            gameState.roundTimes.push({
+                round: gameState.currentRound,
+                time: timeTaken,
+                correct: isCorrect,
+                timeout: false
+            });
+
             if (isCorrect) {
                 gameState.score++;
                 uiElements.score.textContent = gameState.score;
                 buttonElement.classList.replace('border-slate-200', 'border-emerald-500');
                 buttonElement.classList.replace('bg-white', 'bg-emerald-50');
-                showFeedback(true);
+                showFeedback(true, timeTaken);
             } else {
                 buttonElement.classList.replace('border-slate-200', 'border-red-500');
                 buttonElement.classList.replace('bg-white', 'bg-red-50');
                 highlightCorrectAnswer();
-                showFeedback(false, selectedAnswer);
+                showFeedback(false, timeTaken);
             }
         }
 
         function handleTimeout() {
             if (gameState.isAnswered) return;
             gameState.isAnswered = true;
+            
+            gameState.roundTimes.push({
+                round: gameState.currentRound,
+                time: gameState.timerDuration,
+                correct: false,
+                timeout: true
+            });
+
             highlightCorrectAnswer();
-            showFeedback(false, null, true);
+            showFeedback(false, gameState.timerDuration, true);
         }
 
         function highlightCorrectAnswer() {
@@ -399,27 +438,27 @@
             });
         }
 
-        function showFeedback(isCorrect, selectedAnswer = null, isTimeout = false) {
+        function showFeedback(isCorrect, timeTaken, isTimeout = false) {
             uiElements.feedbackOverlay.classList.remove('hidden');
             uiElements.feedbackOverlay.classList.add('flex');
+            uiElements.feedbackSpeed.textContent = isTimeout ? 'Timeout' : `${timeTaken.toFixed(2)}s`;
 
             if (isCorrect) {
                 uiElements.feedbackIcon.innerHTML = `
-                    <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-500">
-                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-500">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>`;
                 uiElements.feedbackTitle.textContent = "Correct!";
                 uiElements.feedbackTitle.className = "text-3xl font-bold mb-2 text-emerald-600";
-                uiElements.feedbackMessage.textContent = "Excellent calculation speed.";
+                uiElements.feedbackMessage.textContent = "Great calculation speed.";
             } else {
                 uiElements.feedbackIcon.innerHTML = `
-                    <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-500">
-                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-500">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </div>`;
                 
                 uiElements.feedbackTitle.textContent = isTimeout ? "Time's Up!" : "Incorrect";
                 uiElements.feedbackTitle.className = "text-3xl font-bold mb-2 text-red-600";
-                
                 uiElements.feedbackMessage.innerHTML = `The correct sum was <span class="font-bold font-mono text-slate-800">${formatCurrency(gameState.currentCorrectAnswer)}</span>.`;
             }
         }
@@ -437,17 +476,64 @@
             switchScreen('end');
             uiElements.finalScore.textContent = `${gameState.score}/${gameState.maxRounds}`;
             
-            // Set final messaging based on performance
             if (gameState.score === 5) {
                 uiElements.finalMessage.textContent = "Perfect! You are a human calculator!";
-                uiElements.finalMessage.className = "mt-3 font-medium text-emerald-600";
+                uiElements.finalMessage.className = "mt-2 text-sm font-medium text-emerald-600";
             } else if (gameState.score >= 3) {
                 uiElements.finalMessage.textContent = "Good job! Keep practicing.";
-                uiElements.finalMessage.className = "mt-3 font-medium text-blue-600";
+                uiElements.finalMessage.className = "mt-2 text-sm font-medium text-blue-600";
             } else {
                 uiElements.finalMessage.textContent = "Don't give up! Accuracy builds over time.";
-                uiElements.finalMessage.className = "mt-3 font-medium text-slate-500";
+                uiElements.finalMessage.className = "mt-2 text-sm font-medium text-slate-500";
             }
+
+            renderSpeedStats();
+        }
+
+        function renderSpeedStats() {
+            let html = '<h3 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide border-b pb-2">Speed Breakdown</h3><ul class="space-y-3 mb-4">';
+            let totalSeconds = 0;
+            let answeredRounds = 0;
+
+            gameState.roundTimes.forEach(rt => {
+                let icon = '';
+                let textClass = '';
+                if (rt.correct) {
+                    icon = '<span class="text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded text-xs font-bold border border-emerald-200">CORRECT</span>';
+                    textClass = 'text-slate-700';
+                } else if (rt.timeout) {
+                    icon = '<span class="text-slate-500 bg-slate-100 px-2 py-0.5 rounded text-xs font-bold border border-slate-200">TIMEOUT</span>';
+                    textClass = 'text-slate-400 line-through';
+                } else {
+                    icon = '<span class="text-red-500 bg-red-50 px-2 py-0.5 rounded text-xs font-bold border border-red-200">INCORRECT</span>';
+                    textClass = 'text-slate-700';
+                }
+
+                const timeStr = rt.timeout ? '--' : `${rt.time.toFixed(2)}s`;
+                
+                html += `
+                    <li class="flex justify-between items-center text-sm">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-slate-500 font-medium">Round ${rt.round}</span>
+                            ${icon}
+                        </div>
+                        <span class="font-mono font-semibold ${textClass}">${timeStr}</span>
+                    </li>`;
+                
+                if (!rt.timeout) {
+                    totalSeconds += rt.time;
+                    answeredRounds++;
+                }
+            });
+
+            const avgTime = answeredRounds > 0 ? (totalSeconds / answeredRounds).toFixed(2) : '0.00';
+            html += `</ul>
+                <div class="flex justify-between items-center border-t border-slate-200 pt-3">
+                    <span class="font-bold text-slate-900">Average Speed:</span>
+                    <span class="font-mono text-lg font-bold text-blue-600">${avgTime}s <span class="text-xs text-slate-500 font-sans font-normal">/ round</span></span>
+                </div>`;
+            
+            uiElements.speedStats.innerHTML = html;
         }
 
         function resetToSetup() {
